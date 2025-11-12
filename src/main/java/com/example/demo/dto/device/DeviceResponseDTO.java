@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -16,8 +15,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DeviceResponseDTO {
-    private UUID id;
-    private UUID userId;
+    private String id;
+    private String userId;
     private String name;
     private String category;
     private String status;
@@ -25,8 +24,8 @@ public class DeviceResponseDTO {
 
     public static DeviceResponseDTO from(Device device) {
         return DeviceResponseDTO.builder()
-                .id(device.getId())
-                .userId(device.getUserId())
+                .id(device.getId().toString())
+                .userId(device.getUserId().toString())
                 .name(device.getName())
                 .category(device.getCategory())
                 .status(device.getStatus())

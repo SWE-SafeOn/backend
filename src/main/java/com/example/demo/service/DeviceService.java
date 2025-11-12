@@ -5,6 +5,8 @@ import com.example.demo.dto.device.DeviceRegisterRequestDTO;
 import com.example.demo.dto.device.DeviceResponseDTO;
 import com.example.demo.entity.Device;
 import com.example.demo.repository.DeviceRepository;
+import com.example.demo.util.UuidParser;
+
 import jakarta.persistence.EntityNotFoundException;
 
 import lombok.RequiredArgsConstructor;
@@ -46,7 +48,7 @@ public class DeviceService {
 
     @Transactional(readOnly = true)
     public DeviceListResponseDTO getDevicesByUserId(String userId) {
-        UUID uuid = parseUUID(userId);
+        UUID uuid = UuidParser.parseUUID(userId);
 
         List<DeviceResponseDTO> responses = deviceRepository.findByUserId(uuid)
                 .stream()
@@ -59,16 +61,9 @@ public class DeviceService {
     }
 
     private Device getDeviceEntity(String deviceId) {
-        UUID uuid = parseUUID(deviceId);
+        UUID uuid = UuidParser.parseUUID(deviceId);
         return deviceRepository.findById(uuid)
                 .orElseThrow(() -> new EntityNotFoundException("디바이스를 찾을 수 없습니다 : " + deviceId));
     }
 
-    private UUID parseUUID(String id) {
-        try {
-            return UUID.fromString(id);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("UUID 형식이 아닙니다.");
-        }
-    }
 }

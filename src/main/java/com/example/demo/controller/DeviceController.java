@@ -9,8 +9,6 @@ import com.example.demo.service.DeviceService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
-import java.util.UUID;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +23,7 @@ public class DeviceController {
 
     // 유저별 디바이스 목록 조회 (대시보드용)
     @GetMapping("/list")
-    public ResponseEntity<ApiResponseDto<DeviceListResponseDTO>> getDevices(@RequestParam UUID userId) {
+    public ResponseEntity<ApiResponseDto<DeviceListResponseDTO>> getDevices(@RequestParam String userId) {
         DeviceListResponseDTO data = deviceService.getDevicesByUserId(userId);
         return ResponseEntity
                 .ok(new ApiResponseDto<>(true, data));
@@ -44,7 +42,7 @@ public class DeviceController {
 
     // 디바이스 단일 조회
     @GetMapping("/{deviceId}")
-    public ResponseEntity<ApiResponseDto<DeviceResponseDTO>> getDevice(@PathVariable UUID deviceId) {
+    public ResponseEntity<ApiResponseDto<DeviceResponseDTO>> getDevice(@PathVariable String deviceId) {
         DeviceResponseDTO data = deviceService.getDevice(deviceId);
         return ResponseEntity
                 .ok(new ApiResponseDto<>(true, data));
@@ -52,7 +50,7 @@ public class DeviceController {
 
     // 디바이스 삭제
     @DeleteMapping("/{deviceId}")
-    public ResponseEntity<ApiResponseDto<Object>> deleteDevice(@PathVariable UUID deviceId) {
+    public ResponseEntity<ApiResponseDto<Object>> deleteDevice(@PathVariable String deviceId) {
         deviceService.deleteDevice(deviceId);
         return ResponseEntity
                 .ok(new ApiResponseDto<>(true, 

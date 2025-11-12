@@ -2,7 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.dto.user.LoginRequestDto;
 import com.example.demo.dto.user.SignUpRequestDto;
-import com.example.demo.dto.user.UserResponse;
+import com.example.demo.dto.user.UserResponseDto;
 import com.example.demo.entity.User;
 import com.example.demo.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -18,7 +18,7 @@ public class UserService {
     private final UserRepository userRepository;
 
     @Transactional
-    public UserResponse createUser(SignUpRequestDto req) {
+    public UserResponseDto createUser(SignUpRequestDto req) {
         if (userRepository.findByEmail(req.email()).isPresent()) {
             throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
         }
@@ -31,16 +31,16 @@ public class UserService {
                                             LocalDateTime.now()
                                         ));
 
-        return UserResponse.from(saved);
+        return UserResponseDto.from(saved);
     }
 
-    public UserResponse login(LoginRequestDto req) {
+    public UserResponseDto login(LoginRequestDto req) {
         User user = userRepository.findByEmail(req.email())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
         if (!user.getPassword().equals(req.password())) {
             throw new IllegalArgumentException("비밀번호가 틀렸습니다.");
         }
 
-        return UserResponse.from(user);
+        return UserResponseDto.from(user);
     }
 }

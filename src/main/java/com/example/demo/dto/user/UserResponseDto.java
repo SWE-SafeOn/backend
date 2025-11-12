@@ -6,14 +6,14 @@ import lombok.Builder;
 import java.util.UUID;
 
 @Builder
-public record UserResponse(
+public record UserResponseDto(
         UUID id,
         String email,
         String name,
         String created_at
 ) {
-    public static UserResponse from(User user) {
-        return UserResponse.builder()
+    public static UserResponseDto from(User user) {
+        return UserResponseDto.builder()
                 .id(user.getId())
                 .email(user.getEmail())
                 .name(user.getName())

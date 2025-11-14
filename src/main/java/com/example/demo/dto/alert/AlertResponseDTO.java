@@ -1,30 +1,50 @@
 package com.example.demo.dto.alert;
 
-import com.example.demo.entity.Alert;
+import com.example.demo.domain.Alert;
+import com.example.demo.domain.UserAlert;
 import lombok.Builder;
 
 @Builder
-public record AlertResponseDTO(
+public record AlertResponseDto(
         String id,
         String userId,
+        String tenantId,
         String deviceId,
-        String type,
-        String level,
-        String message,
+        String severity,
+        String reason,
+        String evidence,
         String timestamp,
-        String status
+        String status,
+        Boolean read,
+        String deliveryStatus
 ) {
 
-    public static AlertResponseDTO from(Alert alert) {
-        return AlertResponseDTO.builder()
-                .id(alert.getId() != null ? alert.getId().toString() : null)
-                .userId(alert.getUserId().toString())
-                .deviceId(alert.getDeviceId().toString())
-                .type(alert.getType())
-                .level(alert.getLevel())
-                .message(alert.getMessage())
-                .timestamp(alert.getTimestamp().toString())
+    public static AlertResponseDto from(UserAlert userAlert) {
+        return from(userAlert.getAlert(),
+                userAlert.getUser() != null ? userAlert.getUser().getUserId().toString() : null,
+                userAlert.getIsRead(),
+                userAlert.getDeliveryStatus());
+    }
+
+    public static AlertResponseDto from(Alert alert, String userId) {
+        return from(alert, userId, null, null);
+    }
+
+    private static AlertResponseDto from(Alert alert, String userId, Boolean read, String deliveryStatus) {
+        return AlertResponseDto.builder()
+                .id(alert.getAlertId() != null ? alert.getAlertId().toString() : null)
+                .userId(userId)
+                .tenantId(alert.getTenant() != null ? alert.getTenant().getTenantId().toString() : null)
+                .deviceId(alert.getDevice() != null && alert.getDevice().getDeviceId() != null
+                        ? alert.getDevice().getDeviceId().toString()
+                        : null)
+                .severity(alert.getSeverity())
+                .reason(alert.getReason())
+                .evidence(alert.getEvidence())
+                .timestamp(alert.getTs() != null ? alert.getTs().toString() : null)
                 .status(alert.getStatus())
+                .read(read)
+                .deliveryStatus(deliveryStatus)
                 .build();
     }
 }

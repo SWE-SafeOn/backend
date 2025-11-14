@@ -1,22 +1,23 @@
 package com.example.demo.dto.user;
 
-import com.example.demo.entity.User;
+import com.example.demo.domain.User;
 import lombok.Builder;
-
 
 @Builder
 public record UserResponseDto(
         String id,
         String email,
         String name,
-        String created_at
+        String defaultTenantId,
+        String registeredAt
 ) {
     public static UserResponseDto from(User user) {
         return UserResponseDto.builder()
-                .id(user.getId().toString())
+                .id(user.getUserId().toString())
                 .email(user.getEmail())
                 .name(user.getName())
-                .created_at(user.getCreatedAt().toString())
+                .defaultTenantId(user.getDefaultTenant() != null ? user.getDefaultTenant().getTenantId().toString() : null)
+                .registeredAt(user.getRegisteredAt() != null ? user.getRegisteredAt().toString() : null)
                 .build();
     }
 }

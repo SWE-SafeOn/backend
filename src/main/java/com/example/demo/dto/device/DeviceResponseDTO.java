@@ -1,35 +1,46 @@
 package com.example.demo.dto.device;
 
-import com.example.demo.entity.Device;
-import lombok.AllArgsConstructor;
+import com.example.demo.domain.Device;
+import com.example.demo.domain.UserDevice;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.util.UUID;
 
-@Getter
-@Setter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class DeviceResponseDTO {
-    private String id;
-    private String userId;
-    private String name;
-    private String category;
-    private String status;
-    private LocalDateTime createdAt;
+public record DeviceResponseDto(
+        String id,
+        String userId,
+        String tenantId,
+        String vendor,
+        String model,
+        String macAddr,
+        String category,
+        String status,
+        String createdAt,
+        String linkedAt
+) {
 
-    public static DeviceResponseDTO from(Device device) {
-        return DeviceResponseDTO.builder()
-                .id(device.getId().toString())
-                .userId(device.getUserId().toString())
-                .name(device.getName())
+    public static DeviceResponseDto from(UserDevice userDevice) {
+        return from(userDevice.getDevice(), userDevice.getUser().getUserId(),
+                userDevice.getLinkedAt() != null ? userDevice.getLinkedAt().toString() : null);
+    }
+
+    public static DeviceResponseDto from(Device device, UUID userId) {
+        return from(device, userId, null);
+    }
+
+    private static DeviceResponseDto from(Device device, UUID userId, String linkedAt) {
+        return DeviceResponseDto.builder()
+                .id(device.getDeviceId() != null ? device.getDeviceId().toString() : null)
+                .userId(userId != null ? userId.toString() : null)
+                .tenantId(device.getTenant() != null ? device.getTenant().getTenantId().toString() : null)
+                .vendor(device.getVendor())
+                .model(device.getModel())
+                .macAddr(device.getMacAddr())
                 .category(device.getCategory())
                 .status(device.getStatus())
-                .createdAt(device.getCreatedAt())
+                .createdAt(device.getCreatedAt() != null ? device.getCreatedAt().toString() : null)
+                .linkedAt(linkedAt)
                 .build();
     }
 }

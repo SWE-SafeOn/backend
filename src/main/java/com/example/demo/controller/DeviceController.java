@@ -1,13 +1,16 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.ApiResponseDto;
-import com.example.demo.dto.device.DeviceListResponseDTO;
-import com.example.demo.dto.device.DeviceRegisterRequestDTO;
-import com.example.demo.dto.device.DeviceResponseDTO;
+import com.example.demo.dto.SimpleMessageResponseDto;
+import com.example.demo.dto.device.DeviceRegisterRequestDto;
+import com.example.demo.dto.device.DeviceResponseDto;
+import com.example.demo.security.AuthContext;
 import com.example.demo.service.DeviceService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+
+import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,40 +23,50 @@ import org.springframework.web.bind.annotation.*;
 public class DeviceController {
 
     private final DeviceService deviceService;
+    private final AuthContext authContext;
 
-    // 유저별 디바이스 목록 조회 (대시보드용)
-    @GetMapping("/list")
-    public ResponseEntity<ApiResponseDto<DeviceListResponseDTO>> getDevices(@RequestParam String userId) {
-        DeviceListResponseDTO data = deviceService.getDevicesByUserId(userId);
-        return ResponseEntity
-                .ok(new ApiResponseDto<>(true, data));
+    @GetMapping
+    public ResponseEntity<ApiResponseDto<java.util.List<DeviceResponseDto>>> getDevices(
+            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader("X-Tenant-Id") String tenantId
+    ) {
+        AuthContext.TenantSession session = authContext.requireSession(userId, tenantId);
+        java.util.List<DeviceResponseDto> data = deviceService.getDevices(session);
+        return ResponseEntity.ok(ApiResponseDto.ok(data));
     }
 
-    // 디바이스 등록
     @PostMapping("/register")
-    public ResponseEntity<ApiResponseDto<DeviceResponseDTO>> registerDevice(
-            @RequestBody DeviceRegisterRequestDTO request) {
+    public ResponseEntity<ApiResponseDto<DeviceResponseDto>> registerDevice(
+            @Valid @RequestBody DeviceRegisterRequestDto request) {
 
-        DeviceResponseDTO data = deviceService.registerDevice(request);
+        AuthContext.TenantSession session = authContext.requireSession(request.getUserId(), request.getTenantId());
+        DeviceResponseDto data = deviceService.registerDevice(request, session);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(new ApiResponseDto<>(true, data));
+                .body(ApiResponseDto.ok(data));
     }
 
-    // 디바이스 단일 조회
     @GetMapping("/{deviceId}")
-    public ResponseEntity<ApiResponseDto<DeviceResponseDTO>> getDevice(@PathVariable String deviceId) {
-        DeviceResponseDTO data = deviceService.getDevice(deviceId);
-        return ResponseEntity
-                .ok(new ApiResponseDto<>(true, data));
+    public ResponseEntity<ApiResponseDto<DeviceResponseDto>> getDevice(
+            @PathVariable String deviceId,
+            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader("X-Tenant-Id") String tenantId
+    ) {
+        AuthContext.TenantSession session = authContext.requireSession(userId, tenantId);
+        DeviceResponseDto data = deviceService.getDevice(deviceId, session);
+        return ResponseEntity.ok(ApiResponseDto.ok(data));
     }
 
-    // 디바이스 삭제
     @DeleteMapping("/{deviceId}")
-    public ResponseEntity<ApiResponseDto<Object>> deleteDevice(@PathVariable String deviceId) {
-        deviceService.deleteDevice(deviceId);
-        return ResponseEntity
-                .ok(new ApiResponseDto<>(true, 
-                        java.util.Map.of("deviceId", deviceId, "deleted", true)));
+    public ResponseEntity<ApiResponseDto<SimpleMessageResponseDto>> deleteDevice(
+            @PathVariable String deviceId,
+            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader("X-Tenant-Id") String tenantId
+    ) {
+        AuthContext.TenantSession session = authContext.requireSession(userId, tenantId);
+        deviceService.deleteDevice(deviceId, session);
+        return ResponseEntity.ok(ApiResponseDto.ok(
+                SimpleMessageResponseDto.of("device deleted: " + deviceId)
+        ));
     }
 }

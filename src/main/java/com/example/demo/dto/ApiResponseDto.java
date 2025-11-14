@@ -1,18 +1,18 @@
 package com.example.demo.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+public record ApiResponseDto<T>(
+        boolean success,
+        T data
+) {
+    public static <T> ApiResponseDto<T> ok(T data) {
+        return new ApiResponseDto<>(true, data);
+    }
 
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
-@Schema(description = "공통 응답 포맷")
-public class ApiResponseDto<T> {
-    @Schema(description = "요청 성공 여부", example = "true")
-    private boolean success;
+    public static ApiResponseDto<Void> ok() {
+        return new ApiResponseDto<>(true, null);
+    }
 
-    @Schema(description = "응답 데이터")
-    private T data;
+    public static <T> ApiResponseDto<T> fail(T data) {
+        return new ApiResponseDto<>(false, data);
+    }
 }

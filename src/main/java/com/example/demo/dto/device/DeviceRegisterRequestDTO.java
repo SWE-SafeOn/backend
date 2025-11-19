@@ -9,12 +9,6 @@ import lombok.NoArgsConstructor;
 public class DeviceRegisterRequestDto {
 
     @NotBlank
-    private String userId;
-
-    @NotBlank
-    private String tenantId;
-
-    @NotBlank
     private String vendor;
 
     @NotBlank
@@ -27,15 +21,11 @@ public class DeviceRegisterRequestDto {
     private String category;
 
     public DeviceRegisterRequestDto(
-            String userId,
-            String tenantId,
             String vendor,
             String model,
             String macAddr,
             String category
     ) {
-        this.userId = userId;
-        this.tenantId = tenantId;
         this.vendor = vendor;
         this.model = model;
         this.macAddr = macAddr;

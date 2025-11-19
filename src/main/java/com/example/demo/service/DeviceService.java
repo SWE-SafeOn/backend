@@ -1,18 +1,14 @@
 package com.example.demo.service;
 
-import com.example.demo.dto.device.DeviceRegisterRequestDto;
-import com.example.demo.dto.device.DeviceResponseDto;
 import com.example.demo.domain.Device;
 import com.example.demo.domain.Tenant;
 import com.example.demo.domain.User;
 import com.example.demo.domain.UserDevice;
-import com.example.demo.exception.TenantAccessException;
+import com.example.demo.dto.device.DeviceRegisterRequestDto;
+import com.example.demo.dto.device.DeviceResponseDto;
 import com.example.demo.repository.DeviceRepository;
-import com.example.demo.repository.TenantRepository;
 import com.example.demo.repository.UserDeviceRepository;
 import com.example.demo.repository.UserRepository;
-import com.example.demo.repository.UserTenantRepository;
-import com.example.demo.security.AuthContext;
 import com.example.demo.util.UuidParser;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -30,18 +26,16 @@ public class DeviceService {
     private static final String STATUS_UNKNOWN = "UNKNOWN";
 
     private final DeviceRepository deviceRepository;
-    private final TenantRepository tenantRepository;
     private final UserRepository userRepository;
     private final UserDeviceRepository userDeviceRepository;
-    private final UserTenantRepository userTenantRepository;
 
     @Transactional
-    public DeviceResponseDto registerDevice(DeviceRegisterRequestDto request, AuthContext.TenantSession session) {
-        UUID userId = session.userId();
-        UUID tenantId = session.tenantId();
-        validateUserBelongsToTenant(userId, tenantId);
+    public DeviceResponseDto registerDevice(DeviceRegisterRequestDto request, UUID userId) {
         User user = getUser(userId);
-        Tenant tenant = getTenant(tenantId);
+        Tenant tenant = user.getDefaultTenant();
+        if (tenant == null) {
+            throw new EntityNotFoundException("사용자의 기본 테넌트를 찾을 수 없습니다.");
+        }
 
         Device device = Device.create(
                 tenant,
@@ -60,63 +54,36 @@ public class DeviceService {
     }
 
     @Transactional
-    public void deleteDevice(String deviceId, AuthContext.TenantSession session) {
-        UUID userId = session.userId();
-        UUID tenantId = session.tenantId();
-        validateUserBelongsToTenant(userId, tenantId);
-        Device device = getDeviceEntity(deviceId, tenantId);
-        device.ensureTenant(tenantId);
-        ensureUserHasDevice(device.getDeviceId(), userId, tenantId);
-        userDeviceRepository.findAllByDeviceDeviceIdAndDeviceTenantTenantId(device.getDeviceId(), tenantId)
+    public void deleteDevice(String deviceId, UUID userId) {
+        UserDevice userDevice = getUserDevice(deviceId, userId);
+        Device device = userDevice.getDevice();
+        userDeviceRepository.findAllByDeviceDeviceId(device.getDeviceId())
                 .forEach(userDeviceRepository::delete);
         deviceRepository.delete(device);
     }
 
     @Transactional(readOnly = true)
-    public DeviceResponseDto getDevice(String deviceId, AuthContext.TenantSession session) {
-        UUID userId = session.userId();
-        UUID tenantId = session.tenantId();
-        validateUserBelongsToTenant(userId, tenantId);
-        Device device = getDeviceEntity(deviceId, tenantId);
-        device.ensureTenant(tenantId);
-        UUID ownerId = userDeviceRepository.findFirstByDeviceDeviceIdAndDeviceTenantTenantId(device.getDeviceId(), tenantId)
-                .map(ud -> ud.getUser().getUserId())
-                .orElse(null);
-        return DeviceResponseDto.from(device, ownerId);
+    public DeviceResponseDto getDevice(String deviceId, UUID userId) {
+        UserDevice userDevice = getUserDevice(deviceId, userId);
+        return DeviceResponseDto.from(userDevice.getDevice(), userDevice.getUser().getUserId());
     }
 
     @Transactional(readOnly = true)
-    public List<DeviceResponseDto> getDevices(AuthContext.TenantSession session) {
-        UUID userId = session.userId();
-        UUID tenantId = session.tenantId();
-        validateUserBelongsToTenant(userId, tenantId);
-        return userDeviceRepository.findAllByUserUserIdAndDeviceTenantTenantId(userId, tenantId)
+    public List<DeviceResponseDto> getDevices(UUID userId) {
+        return userDeviceRepository.findAllByUserUserId(userId)
                 .stream()
                 .map(DeviceResponseDto::from)
                 .toList();
     }
 
-    private void validateUserBelongsToTenant(UUID userId, UUID tenantId) {
-        userTenantRepository.validateUserBelongsToTenant(userId, tenantId);
-    }
-
-    private Device getDeviceEntity(String deviceId, UUID tenantId) {
+    private UserDevice getUserDevice(String deviceId, UUID userId) {
         UUID deviceUuid = UuidParser.parseUUID(deviceId);
-        return deviceRepository.getByDeviceIdAndTenantTenantId(deviceUuid, tenantId);
-    }
-
-    private void ensureUserHasDevice(UUID deviceId, UUID userId, UUID tenantId) {
-        UserDevice userDevice = userDeviceRepository.getByDeviceAndUserAndTenant(deviceId, userId, tenantId);
+        UserDevice userDevice = userDeviceRepository.getByDeviceAndUser(deviceUuid, userId);
         userDevice.ensureOwner(userId);
-        userDevice.ensureTenant(tenantId);
+        return userDevice;
     }
 
     private User getUser(UUID userId) {
         return userRepository.getById(userId);
-    }
-
-    private Tenant getTenant(UUID tenantId) {
-        return tenantRepository.findById(tenantId)
-                .orElseThrow(() -> new EntityNotFoundException("테넌트를 찾을 수 없습니다 : " + tenantId));
     }
 }

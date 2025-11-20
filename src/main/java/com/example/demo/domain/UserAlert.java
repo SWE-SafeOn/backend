@@ -1,6 +1,6 @@
 package com.example.demo.domain;
 
-import com.example.demo.exception.TenantAccessException;
+import com.example.demo.exception.AccessDeniedException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -67,14 +67,7 @@ public class UserAlert {
 
     public void ensureUser(UUID userId) {
         if (user == null || user.getUserId() == null || !user.getUserId().equals(userId)) {
-            throw new TenantAccessException("Alert does not belong to user: " + userId);
+            throw new AccessDeniedException("Alert does not belong to user: " + userId);
         }
-    }
-
-    public void ensureTenant(UUID tenantId) {
-        if (alert == null) {
-            throw new TenantAccessException("Alert tenant could not be verified.");
-        }
-        alert.ensureTenant(tenantId);
     }
 }

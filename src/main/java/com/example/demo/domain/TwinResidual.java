@@ -25,10 +25,6 @@ public class TwinResidual {
     @JoinColumn(name = "flow_id")
     private Flow flow;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tenant_id")
-    private Tenant tenant;
-
     @Column(name = "twin_ver")
     private String twinVer;
 
@@ -41,7 +37,6 @@ public class TwinResidual {
     public static TwinResidual create(
             OffsetDateTime ts,
             Flow flow,
-            Tenant tenant,
             String twinVer,
             Double pred,
             Double actual,
@@ -51,7 +46,6 @@ public class TwinResidual {
         TwinResidual entity = new TwinResidual();
         entity.ts = ts;
         entity.flow = flow;
-        entity.tenant = tenant;
         entity.twinVer = twinVer;
         entity.pred = pred;
         entity.actual = actual;

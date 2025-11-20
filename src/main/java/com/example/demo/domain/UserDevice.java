@@ -1,6 +1,6 @@
 package com.example.demo.domain;
 
-import com.example.demo.exception.TenantAccessException;
+import com.example.demo.exception.AccessDeniedException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -48,14 +48,7 @@ public class UserDevice {
 
     public void ensureOwner(UUID userId) {
         if (user == null || user.getUserId() == null || !user.getUserId().equals(userId)) {
-            throw new TenantAccessException("Device does not belong to user: " + userId);
+            throw new AccessDeniedException("Device does not belong to user: " + userId);
         }
-    }
-
-    public void ensureTenant(UUID tenantId) {
-        if (device == null) {
-            throw new TenantAccessException("Device information missing for tenant verification.");
-        }
-        device.ensureTenant(tenantId);
     }
 }

@@ -1,6 +1,6 @@
 package com.example.demo.domain;
 
-import com.example.demo.exception.TenantAccessException;
+import com.example.demo.exception.AccessDeniedException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -27,10 +27,6 @@ public class Alert {
     private Flow flow;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tenant_id")
-    private Tenant tenant;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "device_id")
     private Device device;
 
@@ -45,7 +41,6 @@ public class Alert {
     public static Alert create(
             OffsetDateTime ts,
             Flow flow,
-            Tenant tenant,
             Device device,
             String severity,
             String reason,
@@ -55,7 +50,6 @@ public class Alert {
         Alert alert = new Alert();
         alert.ts = ts;
         alert.flow = flow;
-        alert.tenant = tenant;
         alert.device = device;
         alert.severity = severity;
         alert.reason = reason;
@@ -72,16 +66,9 @@ public class Alert {
         this.status = status;
     }
 
-    public void ensureTenant(UUID tenantId) {
-        UUID currentTenant = tenant != null ? tenant.getTenantId() : null;
-        if (currentTenant == null || !currentTenant.equals(tenantId)) {
-            throw new TenantAccessException("Alert does not belong to tenant: " + tenantId);
-        }
-    }
-
     public void ensureDevice(Device expectedDevice) {
         if (device == null || !device.getDeviceId().equals(expectedDevice.getDeviceId())) {
-            throw new TenantAccessException("Alert does not belong to the provided device.");
+            throw new AccessDeniedException("Alert does not belong to the provided device.");
         }
     }
 }

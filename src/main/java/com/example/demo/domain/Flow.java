@@ -47,10 +47,6 @@ public class Flow {
 
     private Long pkts;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tenant_id")
-    private Tenant tenant;
-
     public static Flow create(
             String flowKey,
             String srcIp,
@@ -61,8 +57,7 @@ public class Flow {
             OffsetDateTime startTs,
             OffsetDateTime endTs,
             Long bytes,
-            Long pkts,
-            Tenant tenant
+            Long pkts
     ) {
         Flow flow = new Flow();
         flow.flowKey = flowKey;
@@ -75,7 +70,6 @@ public class Flow {
         flow.endTs = endTs;
         flow.bytes = bytes;
         flow.pkts = pkts;
-        flow.tenant = tenant;
         return flow;
     }
 }

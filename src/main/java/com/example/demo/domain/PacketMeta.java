@@ -20,12 +20,8 @@ public class PacketMeta {
     @Column(name = "packet_meta_id")
     private UUID packetMetaId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "flow_id")
-    private Flow flow;
-
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "packetMeta")
-    private AnomalyScore anomalyScore;
+    private UUID flow;
 
     @Column(name = "src_ip")
     private String srcIp;
@@ -65,10 +61,4 @@ public class PacketMeta {
 
     private Integer label;
 
-    public void setAnomalyScore(AnomalyScore anomalyScore) {
-        this.anomalyScore = anomalyScore;
-        if (anomalyScore != null && anomalyScore.getPacketMeta() != this) {
-            anomalyScore.setPacketMeta(this);
-        }
-    }
 }

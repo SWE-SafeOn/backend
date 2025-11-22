@@ -22,12 +22,12 @@ public class AnomalyScore {
 
     private OffsetDateTime ts;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "packet_meta_id", unique = true)
-    private PacketMeta packetMeta;
 
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "anomalyScore")
-    private Alert alert;
+    @JoinColumn(name = "packet_meta_id", unique = true)
+    private UUID packetMeta;
+
+    @Column(name = "alert_id")
+    private UUID alert;
 
     @Column(name = "iso_score")
     private Double isoScore;
@@ -41,17 +41,4 @@ public class AnomalyScore {
     @Column(name = "is_anom")
     private Boolean isAnom;
 
-    public void setPacketMeta(PacketMeta packetMeta) {
-        this.packetMeta = packetMeta;
-        if (packetMeta != null && packetMeta.getAnomalyScore() != this) {
-            packetMeta.setAnomalyScore(this);
-        }
-    }
-
-    public void setAlert(Alert alert) {
-        this.alert = alert;
-        if (alert != null && alert.getAnomalyScore() != this) {
-            alert.setAnomalyScore(this);
-        }
-    }
 }

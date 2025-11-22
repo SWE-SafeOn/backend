@@ -50,21 +50,4 @@ public class Flow {
 
     private Long pkts;
 
-    @OneToMany(mappedBy = "flow", fetch = FetchType.LAZY)
-    @Builder.Default
-    private List<PacketMeta> packetMetaList = new ArrayList<>();
-
-    @OneToMany(mappedBy = "flow", fetch = FetchType.LAZY)
-    @Builder.Default
-    private List<TwinResidual> twinResidualList = new ArrayList<>();
-
-    public void addPacketMeta(PacketMeta packetMeta) {
-        packetMetaList.add(packetMeta);
-        packetMeta.setFlow(this);
-    }
-
-    public void addTwinResidual(TwinResidual twinResidual) {
-        twinResidualList.add(twinResidual);
-        twinResidual.setFlow(this);
-    }
 }

@@ -22,9 +22,8 @@ public class TwinResidual {
 
     private OffsetDateTime ts;
 
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "flow_id")
-    private Flow flow;
+    private UUID flow;
 
     @Column(name = "twin_ver")
     private String twinVer;

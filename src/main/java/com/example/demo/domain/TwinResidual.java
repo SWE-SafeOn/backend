@@ -22,7 +22,7 @@ public class TwinResidual {
 
     private OffsetDateTime ts;
 
-    @JoinColumn(name = "flow_id")
+    @Column(name = "flow_id")
     private UUID flow;
 
     @Column(name = "twin_ver")

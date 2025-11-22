@@ -22,8 +22,7 @@ public class AnomalyScore {
 
     private OffsetDateTime ts;
 
-
-    @JoinColumn(name = "packet_meta_id", unique = true)
+    @Column(name = "packet_meta_id", unique = true)
     private UUID packetMeta;
 
     @Column(name = "alert_id")

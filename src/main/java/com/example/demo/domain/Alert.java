@@ -55,8 +55,8 @@ public class Alert {
 
     public void setAnomalyScore(AnomalyScore anomalyScore) {
         this.anomalyScore = anomalyScore;
-        if (anomalyScore != null && anomalyScore.getAlert() != this) {
-            anomalyScore.setAlert(this);
+        if (anomalyScore != null) {
+            anomalyScore.setAlert(alertId);
         }
     }
 }

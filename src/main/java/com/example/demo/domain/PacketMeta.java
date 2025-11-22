@@ -20,7 +20,7 @@ public class PacketMeta {
     @Column(name = "packet_meta_id")
     private UUID packetMetaId;
 
-    @JoinColumn(name = "flow_id")
+    @Column(name = "flow_id")
     private UUID flow;
 
     @Column(name = "src_ip")

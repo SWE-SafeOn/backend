@@ -25,14 +25,6 @@ public record AlertResponseDto(
                 userAlert.getDeliveryStatus());
     }
 
-    public static AlertResponseDto from(Alert alert, String userId) {
-        return from(alert, userId, null, null);
-    }
-
-    public static AlertResponseDto from(Alert alert) {
-        return from(alert, null, null, null);
-    }
-
     private static AlertResponseDto from(Alert alert, String userId, Boolean read, String deliveryStatus) {
         return AlertResponseDto.builder()
                 .id(alert.getAlertId() != null ? alert.getAlertId().toString() : null)

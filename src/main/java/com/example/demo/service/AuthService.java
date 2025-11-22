@@ -34,7 +34,7 @@ public class AuthService {
                 req.getName(), 
                 OffsetDateTime.now()
         );
-        User saved = userRepository.save(user);
+        userRepository.save(user);
 
         return SimpleMessageResponseDto.of("회원가입을 성공했습니다. 로그인 후 이용해주세요.");
     }

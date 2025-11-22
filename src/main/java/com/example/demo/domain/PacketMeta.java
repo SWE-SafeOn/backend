@@ -2,6 +2,8 @@ package com.example.demo.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
@@ -44,10 +46,10 @@ public class PacketMeta {
     private String timeBucket;
 
     @Column(name = "start_time")
-    private Double startTime;
+    private OffsetDateTime startTime;
 
     @Column(name = "end_time")
-    private Double endTime;
+    private OffsetDateTime endTime;
 
     private Double duration;
 

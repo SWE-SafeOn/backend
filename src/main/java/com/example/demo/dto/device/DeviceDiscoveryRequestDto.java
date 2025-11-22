@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class DeviceRegisterRequestDto {
+public class DeviceDiscoveryRequestDto {
 
     @NotBlank
     private String vendor;
@@ -16,21 +16,9 @@ public class DeviceRegisterRequestDto {
     @NotBlank
     private String macAddr;
 
-    private Boolean discovered;
-
-    private String label;
-
-    public DeviceRegisterRequestDto(
-            String vendor,
-            String ip,
-            String macAddr,
-            Boolean discovered,
-            String label
-    ) {
+    public DeviceDiscoveryRequestDto(String vendor, String ip, String macAddr) {
         this.vendor = vendor;
         this.ip = ip;
         this.macAddr = macAddr;
-        this.discovered = discovered;
-        this.label = label;
     }
 }

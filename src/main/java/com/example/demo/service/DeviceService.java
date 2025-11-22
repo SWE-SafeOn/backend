@@ -3,7 +3,7 @@ package com.example.demo.service;
 import com.example.demo.domain.Device;
 import com.example.demo.domain.User;
 import com.example.demo.domain.UserDevice;
-import com.example.demo.dto.device.DeviceRegisterRequestDto;
+import com.example.demo.dto.device.DeviceDiscoveryRequestDto;
 import com.example.demo.dto.device.DeviceResponseDto;
 import com.example.demo.repository.DeviceRepository;
 import com.example.demo.repository.UserDeviceRepository;
@@ -21,34 +21,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class DeviceService {
 
-    private static final boolean DEFAULT_DISCOVERED = false;
-
     private final DeviceRepository deviceRepository;
     private final UserRepository userRepository;
     private final UserDeviceRepository userDeviceRepository;
-
-    @Transactional
-    public DeviceResponseDto registerDevice(DeviceRegisterRequestDto request, UUID userId) {
-        User user = getUser(userId);
-
-        Device device = Device.create(
-                request.getVendor(),
-                request.getIp(),
-                request.getMacAddr(),
-                request.getDiscovered() != null ? request.getDiscovered() : DEFAULT_DISCOVERED,
-                OffsetDateTime.now()
-        );
-
-        Device savedDevice = deviceRepository.save(device);
-        userDeviceRepository.save(UserDevice.create(
-                user,
-                savedDevice,
-                request.getLabel() != null ? request.getLabel() : request.getVendor(),
-                OffsetDateTime.now()
-        ));
-
-        return DeviceResponseDto.from(savedDevice, userId);
-    }
 
     @Transactional
     public void deleteDevice(String deviceId, UUID userId) {
@@ -71,6 +46,46 @@ public class DeviceService {
                 .stream()
                 .map(DeviceResponseDto::from)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<DeviceResponseDto> getDevicesByDiscovered(boolean discovered) {
+        return deviceRepository.findAllByDiscovered(discovered)
+                .stream()
+                .map(device -> DeviceResponseDto.from(device, null))
+                .toList();
+    }
+
+    @Transactional
+    public DeviceResponseDto createDiscoveredDevice(DeviceDiscoveryRequestDto request) {
+        Device device = Device.create(
+                request.getVendor(),
+                request.getIp(),
+                request.getMacAddr(),
+                false,
+                OffsetDateTime.now()
+        );
+        Device saved = deviceRepository.save(device);
+        return DeviceResponseDto.from(saved, null);
+    }
+
+    @Transactional
+    public DeviceResponseDto claimDevice(String deviceId, UUID userId) {
+        UUID deviceUuid = UuidParser.parseUUID(deviceId);
+        Device device = deviceRepository.getByDeviceId(deviceUuid);
+        if (Boolean.TRUE.equals(device.getDiscovered())) {
+            throw new IllegalStateException("이미 등록된 디바이스입니다: " + deviceId);
+        }
+
+        User user = getUser(userId);
+        device.updateDiscovered(true);
+
+        userDeviceRepository.findByDeviceDeviceIdAndUserUserId(deviceUuid, userId)
+                .orElseGet(() -> userDeviceRepository.save(
+                        UserDevice.create(user, device, device.getVendor(), OffsetDateTime.now())
+                ));
+
+        return DeviceResponseDto.from(device, userId);
     }
 
     private UserDevice getUserDevice(String deviceId, UUID userId) {

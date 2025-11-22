@@ -24,7 +24,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @RequiredArgsConstructor
 public class DashboardService {
 
-    private static final String STATUS_ONLINE = "ONLINE";
     private static final long STREAM_TIMEOUT_MILLIS = Duration.ofMinutes(5).toMillis();
 
     private final UserDeviceRepository userDeviceRepository;
@@ -34,7 +33,7 @@ public class DashboardService {
     @Transactional(readOnly = true)
     public DashboardOverviewDto getOverview(UUID userId) {
         long totalDevices = userDeviceRepository.countByUserUserId(userId);
-        long onlineDevices = userDeviceRepository.countByUserUserIdAndDeviceStatus(userId, STATUS_ONLINE);
+        long onlineDevices = totalDevices;
         long alertCount = userAlertRepository.countByUserUserId(userId);
         UserAlert lastAlert = userAlertRepository
                 .findFirstByUserUserIdOrderByNotifiedAtDesc(userId)

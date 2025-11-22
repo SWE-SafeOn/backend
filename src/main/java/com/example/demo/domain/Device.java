@@ -27,7 +27,7 @@ public class Device {
     private String macAddr;
 
     @Column(name = "discovered")
-    private String discovered;
+    private Boolean discovered;
 
     @Column(name = "created_at")
     private OffsetDateTime createdAt;
@@ -36,7 +36,7 @@ public class Device {
             String vendor,
             String ip,
             String macAddr,
-            String discovered,
+            Boolean discovered,
             OffsetDateTime createdAt
     ) {
         Device device = new Device();
@@ -48,7 +48,7 @@ public class Device {
         return device;
     }
 
-    public void updateDiscovered(String discovered) {
+    public void updateDiscovered(Boolean discovered) {
         this.discovered = discovered;
     }
 }

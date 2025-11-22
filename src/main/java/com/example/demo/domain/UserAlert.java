@@ -67,7 +67,7 @@ public class UserAlert {
 
     public void ensureUser(UUID userId) {
         if (user == null || user.getUserId() == null || !user.getUserId().equals(userId)) {
-            throw new AccessDeniedException("Alert does not belong to user: " + userId);
+            throw new AccessDeniedException("해당 알림은 사용자 " + userId + "의 것이 아닙니다.");
         }
     }
 }

@@ -15,8 +15,6 @@ public interface UserDeviceRepository extends JpaRepository<UserDevice, UUID> {
 
     long countByUserUserId(UUID userId);
 
-    long countByUserUserIdAndDeviceStatus(UUID userId, String status);
-
     List<UserDevice> findAllByDeviceDeviceId(UUID deviceId);
 
     Optional<UserDevice> findFirstByDeviceDeviceId(UUID deviceId);

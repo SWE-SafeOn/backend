@@ -49,7 +49,7 @@ public class Alert {
 
     public void ensureDevice(Device expectedDevice) {
         if (device == null || !device.getDeviceId().equals(expectedDevice.getDeviceId())) {
-            throw new AccessDeniedException("Alert does not belong to the provided device.");
+            throw new AccessDeniedException("해당 알림은 지정된 디바이스에 속하지 않습니다.");
         }
     }
 

@@ -1,7 +1,6 @@
 package com.example.demo.service;
 
 import com.example.demo.domain.Device;
-import com.example.demo.domain.Tenant;
 import com.example.demo.domain.User;
 import com.example.demo.domain.UserDevice;
 import com.example.demo.dto.device.DeviceRegisterRequestDto;
@@ -10,7 +9,6 @@ import com.example.demo.repository.DeviceRepository;
 import com.example.demo.repository.UserDeviceRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.util.UuidParser;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +21,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class DeviceService {
 
-    private static final String STATUS_UNKNOWN = "UNKNOWN";
+    private static final boolean DEFAULT_DISCOVERED = false;
 
     private final DeviceRepository deviceRepository;
     private final UserRepository userRepository;
@@ -32,23 +30,22 @@ public class DeviceService {
     @Transactional
     public DeviceResponseDto registerDevice(DeviceRegisterRequestDto request, UUID userId) {
         User user = getUser(userId);
-        Tenant tenant = user.getDefaultTenant();
-        if (tenant == null) {
-            throw new EntityNotFoundException("사용자의 기본 테넌트를 찾을 수 없습니다.");
-        }
 
         Device device = Device.create(
-                tenant,
                 request.getVendor(),
-                request.getModel(),
+                request.getIp(),
                 request.getMacAddr(),
-                request.getCategory(),
-                STATUS_UNKNOWN,
+                request.getDiscovered() != null ? request.getDiscovered() : DEFAULT_DISCOVERED,
                 OffsetDateTime.now()
         );
 
         Device savedDevice = deviceRepository.save(device);
-        userDeviceRepository.save(UserDevice.create(user, savedDevice, request.getModel(), OffsetDateTime.now()));
+        userDeviceRepository.save(UserDevice.create(
+                user,
+                savedDevice,
+                request.getLabel() != null ? request.getLabel() : request.getVendor(),
+                OffsetDateTime.now()
+        ));
 
         return DeviceResponseDto.from(savedDevice, userId);
     }

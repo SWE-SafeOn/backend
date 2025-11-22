@@ -48,7 +48,7 @@ public class UserDevice {
 
     public void ensureOwner(UUID userId) {
         if (user == null || user.getUserId() == null || !user.getUserId().equals(userId)) {
-            throw new AccessDeniedException("Device does not belong to user: " + userId);
+            throw new AccessDeniedException("해당 디바이스는 사용자 " + userId + "의 소유가 아닙니다.");
         }
     }
 }

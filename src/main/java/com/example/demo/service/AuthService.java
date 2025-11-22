@@ -1,12 +1,10 @@
 package com.example.demo.service;
 
-import com.example.demo.domain.Tenant;
 import com.example.demo.domain.User;
+import com.example.demo.dto.SimpleMessageResponseDto;
 import com.example.demo.dto.user.JwtResponseDto;
 import com.example.demo.dto.user.LoginRequestDto;
 import com.example.demo.dto.user.SignUpRequestDto;
-import com.example.demo.dto.user.UserResponseDto;
-import com.example.demo.repository.TenantRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -21,35 +19,24 @@ import java.time.OffsetDateTime;
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final TenantRepository tenantRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
     @Transactional
-    public JwtResponseDto signup(SignUpRequestDto req) {
+    public SimpleMessageResponseDto signup(SignUpRequestDto req) {
         if (userRepository.existsByEmail(req.getEmail())) {
             throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
         }
 
-        Tenant tenant = tenantRepository.save(
-                Tenant.create(
-                        null,
-                        req.getName() != null ? req.getName() + " Tenant" : "SafeOn Tenant",
-                        OffsetDateTime.now(),
-                        null
-                )
-        );
-
         User user = User.create(
                 req.getEmail(),
                 passwordEncoder.encode(req.getPassword()),
-                req.getName(),
-                tenant,
+                req.getName(), 
                 OffsetDateTime.now()
         );
         User saved = userRepository.save(user);
 
-        return buildJwtResponse(saved);
+        return SimpleMessageResponseDto.of("회원가입을 성공했습니다. 로그인 후 이용해주세요.");
     }
 
     @Transactional(readOnly = true)
@@ -62,8 +49,7 @@ public class AuthService {
     }
 
     private JwtResponseDto buildJwtResponse(User user) {
-        UserResponseDto userResponseDto = UserResponseDto.from(user);
         String token = jwtTokenProvider.generateToken(user);
-        return JwtResponseDto.of(token, userResponseDto);
+        return JwtResponseDto.of(token);
     }
 }

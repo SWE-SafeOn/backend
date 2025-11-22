@@ -11,24 +11,26 @@ public class DeviceRegisterRequestDto {
     @NotBlank
     private String vendor;
 
-    @NotBlank
-    private String model;
+    private String ip;
 
     @NotBlank
     private String macAddr;
 
-    @NotBlank
-    private String category;
+    private Boolean discovered;
+
+    private String label;
 
     public DeviceRegisterRequestDto(
             String vendor,
-            String model,
+            String ip,
             String macAddr,
-            String category
+            Boolean discovered,
+            String label
     ) {
         this.vendor = vendor;
-        this.model = model;
+        this.ip = ip;
         this.macAddr = macAddr;
-        this.category = category;
+        this.discovered = discovered;
+        this.label = label;
     }
 }

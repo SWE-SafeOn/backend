@@ -25,8 +25,8 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<ApiResponseDto<JwtResponseDto>> signup(@Valid @RequestBody SignUpRequestDto req) {
-        JwtResponseDto data = authService.signup(req);
+    public ResponseEntity<ApiResponseDto<SimpleMessageResponseDto>> signup(@Valid @RequestBody SignUpRequestDto req) {
+        SimpleMessageResponseDto data = authService.signup(req);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponseDto.ok(data));
@@ -40,7 +40,7 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<ApiResponseDto<SimpleMessageResponseDto>> logout() {
-        SimpleMessageResponseDto response = SimpleMessageResponseDto.of("logout success");
+        SimpleMessageResponseDto response = SimpleMessageResponseDto.of("로그아웃 성공.");
         return ResponseEntity.ok(ApiResponseDto.ok(response));
     }
 }

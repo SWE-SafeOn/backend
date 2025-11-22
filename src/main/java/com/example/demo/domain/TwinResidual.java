@@ -1,9 +1,7 @@
 package com.example.demo.domain;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -11,12 +9,15 @@ import java.util.UUID;
 @Entity
 @Table(name = "twin_residuals")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class TwinResidual {
 
     @Id
-    @Column(name = "residual_id")
     @GeneratedValue(generator = "uuid2")
+    @Column(name = "residual_id")
     private UUID residualId;
 
     private OffsetDateTime ts;
@@ -33,24 +34,4 @@ public class TwinResidual {
     private Double residual;
 
     private String state;
-
-    public static TwinResidual create(
-            OffsetDateTime ts,
-            Flow flow,
-            String twinVer,
-            Double pred,
-            Double actual,
-            Double residual,
-            String state
-    ) {
-        TwinResidual entity = new TwinResidual();
-        entity.ts = ts;
-        entity.flow = flow;
-        entity.twinVer = twinVer;
-        entity.pred = pred;
-        entity.actual = actual;
-        entity.residual = residual;
-        entity.state = state;
-        return entity;
-    }
 }

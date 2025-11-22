@@ -1,9 +1,7 @@
 package com.example.demo.domain;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -11,19 +9,25 @@ import java.util.UUID;
 @Entity
 @Table(name = "anomaly_scores")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class AnomalyScore {
 
     @Id
-    @Column(name = "score_id")
     @GeneratedValue(generator = "uuid2")
+    @Column(name = "score_id")
     private UUID scoreId;
 
     private OffsetDateTime ts;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "flow_id")
-    private Flow flow;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "packet_meta_id", unique = true)
+    private PacketMeta packetMeta;
+
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "anomalyScore")
+    private Alert alert;
 
     @Column(name = "iso_score")
     private Double isoScore;
@@ -37,21 +41,17 @@ public class AnomalyScore {
     @Column(name = "is_anom")
     private Boolean isAnom;
 
-    public static AnomalyScore create(
-            OffsetDateTime ts,
-            Flow flow,
-            Double isoScore,
-            Double lstmScore,
-            Double hybridScore,
-            Boolean isAnom
-    ) {
-        AnomalyScore score = new AnomalyScore();
-        score.ts = ts;
-        score.flow = flow;
-        score.isoScore = isoScore;
-        score.lstmScore = lstmScore;
-        score.hybridScore = hybridScore;
-        score.isAnom = isAnom;
-        return score;
+    public void setPacketMeta(PacketMeta packetMeta) {
+        this.packetMeta = packetMeta;
+        if (packetMeta != null && packetMeta.getAnomalyScore() != this) {
+            packetMeta.setAnomalyScore(this);
+        }
+    }
+
+    public void setAlert(Alert alert) {
+        this.alert = alert;
+        if (alert != null && alert.getAnomalyScore() != this) {
+            alert.setAnomalyScore(this);
+        }
     }
 }

@@ -2,9 +2,7 @@ package com.example.demo.domain;
 
 import com.example.demo.exception.AccessDeniedException;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -12,19 +10,22 @@ import java.util.UUID;
 @Entity
 @Table(name = "alerts")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Alert {
 
     @Id
-    @Column(name = "alert_id")
     @GeneratedValue(generator = "uuid2")
+    @Column(name = "alert_id")
     private UUID alertId;
 
     private OffsetDateTime ts;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "flow_id")
-    private Flow flow;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "anomaly_score_id", unique = true)
+    private AnomalyScore anomalyScore;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "device_id")
@@ -38,26 +39,6 @@ public class Alert {
 
     private String status;
 
-    public static Alert create(
-            OffsetDateTime ts,
-            Flow flow,
-            Device device,
-            String severity,
-            String reason,
-            String evidence,
-            String status
-    ) {
-        Alert alert = new Alert();
-        alert.ts = ts;
-        alert.flow = flow;
-        alert.device = device;
-        alert.severity = severity;
-        alert.reason = reason;
-        alert.evidence = evidence;
-        alert.status = status;
-        return alert;
-    }
-
     public void acknowledge() {
         this.status = "ACKNOWLEDGED";
     }
@@ -69,6 +50,13 @@ public class Alert {
     public void ensureDevice(Device expectedDevice) {
         if (device == null || !device.getDeviceId().equals(expectedDevice.getDeviceId())) {
             throw new AccessDeniedException("Alert does not belong to the provided device.");
+        }
+    }
+
+    public void setAnomalyScore(AnomalyScore anomalyScore) {
+        this.anomalyScore = anomalyScore;
+        if (anomalyScore != null && anomalyScore.getAlert() != this) {
+            anomalyScore.setAlert(this);
         }
     }
 }

@@ -1,22 +1,25 @@
 package com.example.demo.domain;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
 @Table(name = "flows")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Flow {
 
     @Id
-    @Column(name = "flow_id")
     @GeneratedValue(generator = "uuid2")
+    @Column(name = "flow_id")
     private UUID flowId;
 
     @Column(name = "flow_key")
@@ -47,29 +50,21 @@ public class Flow {
 
     private Long pkts;
 
-    public static Flow create(
-            String flowKey,
-            String srcIp,
-            String dstIp,
-            Short srcPort,
-            Short dstPort,
-            String l4Proto,
-            OffsetDateTime startTs,
-            OffsetDateTime endTs,
-            Long bytes,
-            Long pkts
-    ) {
-        Flow flow = new Flow();
-        flow.flowKey = flowKey;
-        flow.srcIp = srcIp;
-        flow.dstIp = dstIp;
-        flow.srcPort = srcPort;
-        flow.dstPort = dstPort;
-        flow.l4Proto = l4Proto;
-        flow.startTs = startTs;
-        flow.endTs = endTs;
-        flow.bytes = bytes;
-        flow.pkts = pkts;
-        return flow;
+    @OneToMany(mappedBy = "flow", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<PacketMeta> packetMetaList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "flow", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<TwinResidual> twinResidualList = new ArrayList<>();
+
+    public void addPacketMeta(PacketMeta packetMeta) {
+        packetMetaList.add(packetMeta);
+        packetMeta.setFlow(this);
+    }
+
+    public void addTwinResidual(TwinResidual twinResidual) {
+        twinResidualList.add(twinResidual);
+        twinResidual.setFlow(this);
     }
 }
